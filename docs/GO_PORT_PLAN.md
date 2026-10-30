@@ -1,6 +1,6 @@
 # mcpherd: Go Port Plan
 
-`mcpherd` is a Go reimplementation of [ollmcp](https://github.com/jonigl/mcp-client-for-ollama) (`mcp-client-for-ollama`, ~9.4k lines of Python, ~5k lines of tests), preferring the standard library.
+`mcpherd` is a Go reimplementation of an existing Python MCP client ([source](https://github.com/jonigl/mcp-client-for-ollama), ~9.4k lines of Python, ~5k lines of tests), preferring the standard library. File and test names below (`client.py`, `test_*.py`) refer to that codebase.
 
 - Module: `github.com/shaynemeyer/mcpherd`
 - Binary: `mcpherd`
@@ -8,8 +8,8 @@
 ## Goals
 
 - Use the standard library by default. External modules are allowed only where hand-rolling costs more than it gains.
-- Keep its own files in `~/.config/mcpherd/` (`config.json`, named configs, `mcp.json`, `mcp.local.json`, `logs/`), using the same JSON formats as ollmcp. The project-scope `.mcp.json` stays in the project root, shared with ollmcp and Claude Code.
-- Import an existing ollmcp setup from `~/.config/ollmcp/` only when the user runs `mcpherd import ollmcp` (see Phase 6). Never write to ollmcp's files.
+- Keep its own files in `~/.config/mcpherd/` (`config.json`, named configs, `mcp.json`, `mcp.local.json`, `logs/`), using the same JSON formats as the Python version. The project-scope `.mcp.json` stays in the project root, shared with other MCP clients such as Claude Code.
+- Import an existing setup from `~/.config/ollmcp/` only when the user runs `mcpherd import ollmcp` (see Phase 6). Never write to the source files.
 - Work incrementally: every phase ends with something that runs and has tests ported from the Python suite.
 
 ## Dependency policy
@@ -189,8 +189,8 @@ Each phase lists what it builds, which Python code it ports, and how to check it
 
 - `ConfigManager` (provider profiles, validation, name sanitizing), scoped registry with `local > project > user` precedence, `mcpherd mcp add/list/remove`.
 - Config directory: `~/.config/mcpherd/`, created on first use with defaults. Startup never reads `~/.config/ollmcp/`.
-- `mcpherd import ollmcp`: copy `config.json`, named config `*.json`, `mcp.json` and `mcp.local.json` (not `logs/`) from `~/.config/ollmcp/`. Copy, don't move, so ollmcp keeps working. Never overwrite: a file that already exists in `~/.config/mcpherd/` is skipped. Print each file as copied or skipped. Exit with an error if `~/.config/ollmcp/` does not exist.
-- Check: `test_config_manager.py`, `test_mcp_registry.py`, `test_mcp_cli_commands.py`; a config saved by ollmcp loads in Go; import tests on a temp `$HOME` (no ollmcp setup, fresh import, some files already present).
+- `mcpherd import ollmcp`: copy `config.json`, named config `*.json`, `mcp.json` and `mcp.local.json` (not `logs/`) from `~/.config/ollmcp/`. Copy, don't move, so the source setup keeps working. Never overwrite: a file that already exists in `~/.config/mcpherd/` is skipped. Print each file as copied or skipped. Exit with an error if `~/.config/ollmcp/` does not exist.
+- Check: `test_config_manager.py`, `test_mcp_registry.py`, `test_mcp_cli_commands.py`; a config saved by the Python version loads in Go; import tests on a temp `$HOME` (no source setup, fresh import, some files already present).
 
 ```mermaid
 flowchart TD
@@ -205,7 +205,7 @@ flowchart TD
 
 ### Phase 7: OpenAI-compatible providers (stdlib only)
 
-- `llm/openai`: `/chat/completions` with SSE, rebuilding streamed tool-call arguments, `/models`; default base URLs per provider; API key order: flag, then `$OLLMCP_API_KEY`, then profile; reasoning effort mapping.
+- `llm/openai`: `/chat/completions` with SSE, rebuilding streamed tool-call arguments, `/models`; default base URLs per provider; API key order: flag, then `$MCPHERD_API_KEY`, then profile; reasoning effort mapping.
 - Ports: `utils/connection.py`, `models/manager.py`, `models/config_manager.py` (completion kwargs).
 - Check: `test_reasoning_effort.py`, `test_api_key_persistence.py`; one real OpenRouter call.
 
@@ -233,7 +233,7 @@ flowchart TD
 ### Phase 12: Release
 
 - Cross-compiled binaries (`GOOS`/`GOARCH` matrix in CI), update check against GitHub releases instead of PyPI.
-- Concise README with the acknowledgment below; LICENSE carrying both notices (see Credits and licensing).
+- Concise README; keep the existing Credits section and `LICENSE` notices (see Credits and licensing).
 
 ## Risks
 
@@ -247,9 +247,8 @@ flowchart TD
 
 ## Credits and licensing
 
-- README acknowledgment: _"Inspired by [ollmcp](https://github.com/jonigl/mcp-client-for-ollama) by Jonathan Löwenstern; mcpherd is a Go reimplementation of its design."_
-- ollmcp is MIT-licensed. A close port of its behavior, tests and constants is arguably a derivative work, and the [MIT License](https://opensource.org/license/mit) requires keeping its copyright and permission notice in "all copies or substantial portions of the Software." Include the original notice in `LICENSE` (or a `NOTICE` file) next to the mcpherd one. This is a cautious default, not legal advice.
-- Optional: tell the ollmcp maintainer about the port.
+Done: the README's Credits section holds the acknowledgment, and `LICENSE` carries the original
+project's MIT notice next to mcpherd's. Keep both as they are; don't repeat them elsewhere.
 
 ### Name check (2026-10-29)
 

@@ -26,7 +26,13 @@ mcpherd import ollmcp
 
 ## Configuration
 
-mcpherd keeps its files in `~/.config/mcpherd/`, in the same JSON formats as ollmcp. To bring over an existing ollmcp setup, run `mcpherd import ollmcp`. It copies the files and never overwrites any that already exist. mcpherd never writes to ollmcp's files. A project's `.mcp.json` file stays in the project root.
+mcpherd keeps its files in `~/.config/mcpherd/`. To bring over an existing ollmcp setup, run `mcpherd import ollmcp`. It copies the files and never overwrites any that already exist, and it never writes to the source files. A project's `.mcp.json` file stays in the project root.
+
+## Contributing
+
+The repository is set up for Claude Code and Kiro. Both load `AGENTS.md`, which points to the
+project context in `context/`. Shared agent skills live in `.kiro/skills/`, and `.claude/skills/`
+links to them.
 
 ## Credits
 
@@ -34,4 +40,4 @@ Inspired by [ollmcp](https://github.com/jonigl/mcp-client-for-ollama) by Jonatha
 
 ## License
 
-MIT. See [LICENSE](LICENSE), which also carries ollmcp's MIT notice.
+MIT. See [LICENSE](LICENSE).
