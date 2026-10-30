@@ -24,6 +24,11 @@ Initialize the target project without overwriting existing context silently. Pat
 4. Copy `templates/README.md` to `context/README.md`.
 5. Copy `templates/current-feature.md` to `context/current-feature.md`.
 6. Create `context/testing-instructions.md` from the actual test configuration and conventions: when tests are warranted, what to test, and exact validated commands. Do not assume a framework.
+   End it with a `## Parallel Safety` section saying whether the test suite (and the build and
+   lint commands) can run in several git worktrees at once, and why: fixed ports, a shared
+   database or service, shared temp files or caches outside the worktree. Write "safe", "not
+   safe" or "unknown" first, then the evidence. The `parallel` action reads it, and refuses to
+   run a batch when it says "not safe".
 7. Create `context/coding-standards.md` from repository evidence: language and naming conventions, framework patterns, organization, error handling, validation, configured linting/formatting, and subproject differences. Do not invent conventions for a thin codebase.
 8. Make sure review output stays out of source control. Use the review output folder recorded in
    `context/ai-interaction.md` under "Review Output" (`.reviews/` unless the project already uses
@@ -31,6 +36,9 @@ Initialize the target project without overwriting existing context silently. Pat
    the folder to the root `.gitignore` under a `# Review output` comment, creating `.gitignore` if
    it doesn't exist. Don't create the folder itself. If files under that folder are already
    tracked by git, report them and leave them alone; removing them from git is the user's call.
+   Do the same for `.worktrees/`, where the `parallel` action puts its git worktrees: if
+   `git check-ignore -q .worktrees/x` reports it isn't ignored, add `.worktrees/` under a
+   `# Parallel worktrees` comment.
 9. Make the five context files always-on context, using whatever mechanism the project's agent
    tools load automatically. Prefer one shared file over a copy per tool, since a second always-on
    copy is the kind that drifts. For Kiro and Claude Code:

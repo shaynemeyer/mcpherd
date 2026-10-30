@@ -1,6 +1,7 @@
 # Start Action
 
-1. Read `context/current-feature.md` and `context/ai-interaction.md`. If Goals are empty or the
+1. Read `context/current-feature.md` and `context/ai-interaction.md`. If a `## Batch` section exists,
+   stop: batch specs are implemented by `parallel`, not `start`. If Goals are empty or the
    `**Spec:**` line reads `none`, stop and report that the `load` action must run first.
 2. Prepare the base branch, with permission for each git step:
    - Check that the working tree is clean (`git status --porcelain`). If it isn't, stop and show the

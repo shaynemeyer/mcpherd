@@ -1,7 +1,8 @@
 # Explain Action
 
 1. Read `context/current-feature.md` and the spec on its `**Spec:**` line to understand what was
-   implemented.
+   implemented. During a batch (`**Spec:** batch`), take the spec from its `## Batch` row and run
+   the git commands below in its worktree (`git -C <worktree>`).
 2. Run `git diff <base>...HEAD --name-only` to get the list of files changed, where `<base>` is the
    base branch named in `context/ai-interaction.md` (ask if it isn't recorded). Add
    `git status --porcelain` for changes not yet committed.

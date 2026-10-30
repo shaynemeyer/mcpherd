@@ -21,9 +21,17 @@ Every git step below requires explicit user permission before running, and the b
 first. Confirm before starting. If the agent's own permissions block `git push`, give the user the
 exact command instead of working around it.
 
+**Batch specs.** If `context/current-feature.md` has a `## Batch` section, `complete` needs a spec
+id (`complete <nn-name>`); without one, list the batch specs and their states and ask. Find the
+spec's row under `## Batch`, and follow "Completing batch specs" in `actions/parallel.md` for how
+the steps below change: phase 1 is already done, step 8 removes the spec from the batch record
+instead of resetting the file, step 11 stages the batch state, and step 13 leaves the worktree to
+the `parallel` cleanup.
+
 ## Phase 1: the feature review request
 
-Find the spec from the `**Spec:**` line of `context/current-feature.md`.
+Find the spec from the `**Spec:**` line of `context/current-feature.md`, or from the `## Batch`
+row for a batch spec.
 
 1. Verify the project's build and tests pass, using the commands in `context/ai-interaction.md`.
    For a change confined to docs, run the checks that cover anything touched, and say which ones
@@ -45,7 +53,8 @@ Find the spec from the `**Spec:**` line of `context/current-feature.md`.
 
 6. Create the completion branch from the updated `<base>`, named per the project's convention
    (default `chore/feature-<nn>-completion`).
-7. Mark the spec complete. In the frontmatter of the spec named on the `**Spec:**` line, change
+7. Mark the spec complete. In the frontmatter of the spec named on the `**Spec:**` line (or in the
+   batch row), change
    `status: In Progress` (which `start` wrote) to `status: Complete`, and add the line
    `merged: YYYY-MM-DD (<merge commit sha>)` directly after it. Then run
    `scripts/spec-fields.sh check` and confirm it reports nothing for this spec.
@@ -53,7 +62,9 @@ Find the spec from the `**Spec:**` line of `context/current-feature.md`.
    or the archive ends up out of order:
    - If `## History` in `context/current-feature.md` already holds an entry, append it to the END
      of `context/feature-history.md` (the archive, oldest to newest).
-   - Then reset `context/current-feature.md`:
+   - Then reset `context/current-feature.md` (for a batch spec, remove only this spec from the
+     batch record instead, as `actions/parallel.md` "Batch record" describes, and do the full
+     reset below only when it was the last one):
      - Change the H1 back to `# Current Feature` and the `**Spec:**` line back to `none`.
      - Set Status back to "Not Started".
      - Clear the Goals and Notes sections, keeping the placeholder comments.

@@ -1,6 +1,6 @@
 # Testing Instructions
 
-No tests exist yet; there is no Go code. This file records the plan from `docs/GO_PORT_PLAN.md`.
+No tests exist yet; there is no Go code. This file records the plan from `docs/plans/GO_PORT_PLAN.md`.
 Update it with the real commands and layout once Phase 0 lands.
 
 ## Framework and Layout

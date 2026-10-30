@@ -1,7 +1,7 @@
 # Coding Standards
 
 The codebase is empty, so there are no established conventions to derive. This file records what
-`docs/GO_PORT_PLAN.md` decides and standard Go practice for the stack it names. Replace the general
+`docs/plans/GO_PORT_PLAN.md` decides and standard Go practice for the stack it names. Replace the general
 items with the project's actual patterns as code lands.
 
 ## From the Plan
@@ -13,7 +13,7 @@ items with the project's actual patterns as code lands.
 - CLI with the standard `flag` package, one `FlagSet` per subcommand.
 - Terminal output with ANSI escape codes and `text/tabwriter`; no TUI framework.
 - `internal/llm` providers behind the `Provider` interface, MCP transports behind the `Transport`
-  interface, both in `docs/GO_PORT_PLAN.md` "Key interfaces".
+  interface, both in `docs/plans/GO_PORT_PLAN.md` "Key interfaces".
 - Split by responsibility into packages rather than porting large classes line by line.
 - Cancellation through `context.Context` (abort uses `context.WithCancel`).
 - MCP stdio server stderr goes to the log file, never to the screen.

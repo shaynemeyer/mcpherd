@@ -1,6 +1,8 @@
 # Test Action
 
-1. Read `context/current-feature.md` to understand what was implemented.
+1. Read `context/current-feature.md` to understand what was implemented. During a batch
+   (`**Spec:** batch`), take the spec from its `## Batch` row and write and run the tests in its
+   worktree.
 2. Read `context/ai-interaction.md` for the project's test and build commands, and
    `context/coding-standards.md` for testing conventions. Use those — do not assume a framework
    or command.

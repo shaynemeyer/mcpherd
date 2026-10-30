@@ -1,5 +1,9 @@
 # Load Action
 
+0. Read `context/current-feature.md`. If it has a `## Batch` section, a parallel batch is active:
+   stop and report its specs and states. A single feature can't be loaded until the batch is
+   finished, or the user drops its remaining specs (see `actions/abandon.md`, "Batch specs").
+
 1. Interpret what the user supplied after "load":
    - Looks like a filename (single word, no spaces): look for `context/features/{name}.md` OR
      `context/fixes/{name}.md`.
@@ -23,7 +27,8 @@
      leftover branch before continuing.
 
 3. Clear stale `In Progress` markers: every id from `scripts/spec-fields.sh in-progress` other than
-   the spec being loaded is stale. Set each one's `status` back to `Not Started`, and say which ones
+   the spec being loaded is stale (step 0 already ruled out a batch, whose specs would not be).
+   Set each one's `status` back to `Not Started`, and say which ones
    were reset — an abandoned attempt may also have left a branch and uncommitted work behind that
    the user has forgotten about.
 
