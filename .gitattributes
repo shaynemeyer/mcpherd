@@ -1,0 +1,4 @@
+# Keep LF line endings on every platform, including Windows checkouts with core.autocrlf.
+# Shell scripts fail under sh with CRLF endings, and spec frontmatter is read line by line.
+*.sh text eol=lf
+context/**/*.md text eol=lf

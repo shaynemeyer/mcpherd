@@ -1,6 +1,7 @@
 # Feature Skill: Spec Frontmatter Plan
 
-**Status:** Draft, not started.
+**Status:** Implemented 2026-10-30 on branch `chore/spec-frontmatter`. See "Implementation notes"
+for where the build differs from the design below.
 
 This plan covers changes to the `feature` skill in `.kiro/skills/feature/`. Claude Code reads the
 same files through the `.claude/skills/feature` symlink. It is not part of mcpherd itself.
@@ -44,8 +45,6 @@ depends_on:
 touches:
   - internal/llm/ollama/
   - cmd/mcpherd/main.go
-  - config:host
-  - cmd:mcpherd mcp add
 ---
 
 # Chat client
@@ -59,7 +58,7 @@ touches:
 | `status` | yes | `Not Started`, `In Progress` or `Complete` |
 | `merged` | when `status: Complete` | `YYYY-MM-DD (<sha>)`, the merge date and commit `complete` records |
 | `depends_on` | yes | Spec ids (filename without `.md`) of specs in `context/features/` or `context/fixes/`, or `[]` for none |
-| `touches` | yes | What the spec creates or changes, or `[]` while unknown. Paths are relative to the repository root, with a trailing `/` for a folder. Other kinds of name use a prefix: `config:<key>`, `cmd:<command>`, `test:<test file basename>`, `name:<public identifier>` |
+| `touches` | yes | File and folder paths the spec creates or changes, relative to the repository root, with a trailing `/` for a folder, or `[]` while unknown. Paths only (see "Decisions") |
 
 The spec id is the filename. It is not repeated in the frontmatter, so it can't drift.
 
@@ -103,6 +102,7 @@ prints an `_error` line. Every query builds on it:
 | Dependency order and cycles | `plan`, `audit` | `depends_on` pairs piped to `tsort`; a `cycle in data` message means a cycle |
 | Overlapping touches | `audit`, parallel independence check | `touches` values that appear under more than one spec |
 | Malformed specs | `audit`, `status` | `_error` rows, unknown `status` values, `depends_on` ids with no file |
+| Old-format specs | every action that reads specs | `_error: no frontmatter`; stop and point to `audit` |
 
 The script searches the folders with `find`, so empty or missing folders are not an error, and
 it reads only the frontmatter block, so a body line that starts with `status:` is ignored.
@@ -146,13 +146,14 @@ other line, and never rewrite the whole block. After writing, the action re-read
 Projects set up before this change have specs with `**Status:**` and `**Depends on:**` lines and a
 `## Touches` section. mcpherd has none yet, so it needs no migration.
 
-- **Read both formats for one release.** When `spec-fields.sh` reports `_error: no frontmatter`,
-  actions fall back to reading the old lines, and say the spec uses the old format.
-- **`audit` converts.** Its structure check rewrites an old-format spec: status and merge details
-  into `status` and `merged`, the `Depends on:` line into `depends_on` ids (resolving numbers and
-  ranges such as "features 91–99" to filenames, and asking when one is ambiguous), and the
-  `## Touches` bullets into `touches`. It shows the converted frontmatter before writing.
-- **Then drop the fallback.** Once projects have run `audit`, remove the old-format reading.
+- **Actions read only frontmatter.** There is no code path for the old format. When
+  `spec-fields.sh` reports `_error: no frontmatter` for a spec, the action stops before changing
+  anything, names the spec, and says to run `audit` to convert it.
+- **`audit` converts, once.** Its structure check rewrites an old-format spec: status and merge
+  details into `status` and `merged`, the `Depends on:` line into `depends_on` ids (resolving
+  numbers and ranges such as "features 91–99" to filenames, and asking when one is ambiguous), and
+  the `## Touches` bullets into `touches` paths. It shows the converted frontmatter and asks before
+  writing. Bullets that aren't paths move to `## Notes`.
 
 ## Why not a database
 
@@ -173,9 +174,13 @@ the source of truth.
 - **Hand edits outside the format rules**, such as a flow list `[a, b]` with items or a quoted
   value. `spec-fields.sh` would misread them. `audit` and `status` report specs that don't parse
   cleanly, and `audit` fixes them.
-- **Two copies during migration.** A half-converted spec could carry both a frontmatter `status`
-  and an old `**Status:**` line. `audit` removes the old line when it converts, and treats a spec
-  with both as malformed.
+- **Half-converted specs.** A spec edited by hand could carry both a frontmatter `status` and an
+  old `**Status:**` line. `audit` removes the old line when it converts, and treats a spec with both
+  as malformed.
+- **Collisions that paths miss.** Two specs could add the same setting or command in different
+  files. In this Go layout, each kind of name lives in a predictable file, so the paths usually
+  overlap anyway. If `audit` finds a clash that paths missed, add name prefixes to `touches` then;
+  existing path-only specs stay valid.
 - **Tool differences.** BSD and GNU `awk`, `find` and `tsort` differ in small ways. The prototype
   ran on macOS; test on Linux before release.
 
@@ -190,13 +195,43 @@ the source of truth.
 5. Trial: run `plan` on `docs/GO_PORT_PLAN.md`, then `status`, `audit` and a `load`. Check the
    reported next up and dependency order by hand.
 
-## Open questions
+## Decisions
 
-1. **Order relative to the parallel plan.** The parallel action's independence check is the
-   biggest user of `depends_on` and `touches`. Doing this plan first means the parallel action is
-   built on exact data from the start. Recommended: do this first.
-2. **`touches` prefixes.** Are `config:`, `cmd:`, `test:` and `name:` the right set, or is a plain
-   path list enough to start with?
-3. **Old-format fallback.** Keep it for one release as planned, or skip it? mcpherd has no specs
-   yet. Skipping is only safe if no other project using this skill has specs in the current
-   format.
+Decided 2026-10-30.
+
+1. **This plan comes before the parallel plan.** The parallel action's independence check is the
+   biggest user of `depends_on` and `touches`, so it is built on exact data from the start.
+2. **`touches` holds paths only.** No `config:`, `cmd:`, `test:` or `name:` prefixes for now.
+   Paths catch most collisions, and prefixes can be added later without breaking existing specs
+   (see "Risks").
+3. **No old-format fallback.** Actions read only frontmatter. An action that finds an old-format
+   spec stops and says to run `audit`, which converts it after showing the result (see
+   "Migration").
+
+## Implementation notes
+
+Built 2026-10-30. Two changes from the design above:
+
+- **Commands instead of pipelines.** `scripts/spec-fields.sh` takes a command (`status`,
+  `outstanding`, `complete`, `in-progress`, `next`, `dependents <id>`, `order`,
+  `overlaps [<id>...]`, `check`, `fields`) rather than printing raw rows for each action to filter.
+  The actions name a command instead of carrying their own `awk` one-liners, so there is one
+  implementation of each query. `SKILL.md` "Spec Files" lists the commands.
+- **No `tsort`.** BusyBox, the base of Alpine Linux, has no `tsort`, and macOS `tsort` exits 0 on a
+  cycle. `order` sorts the specs itself in `awk` (Kahn's algorithm), breaks ties by lowest id so the
+  order is stable, and exits 1 naming the specs on a cycle. The script now needs only `sh`, `awk`,
+  `find` and `sort`.
+
+Also added beyond the design: `check` reports duplicate ids across `features/` and `fixes/`, a
+`depends_on` naming the spec itself, `merged` without `status: Complete`, quoted values, comments
+and flow lists with items. `overlaps` treats a `touches` folder (ending in `/`) as overlapping every
+path inside it. `SPEC_DIRS` overrides the folders searched.
+
+**Verification.** `scripts/test-spec-fields.sh` builds sample specs in a temporary folder and runs
+38 checks covering every command, an empty `features/` with no `fixes/`, every `check` problem, a
+dependency cycle and `SPEC_DIRS`. All pass on macOS (BSD `awk` 20200816, `/bin/sh`), Debian stable
+(`dash`, `mawk`) and Alpine (BusyBox `sh` and `awk`), the last two run in Podman containers. Windows
+(Git Bash) is not tested.
+
+The trial in "Implementation order" step 5, running `plan` on `docs/GO_PORT_PLAN.md`, has not been
+done yet.

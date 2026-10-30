@@ -33,15 +33,17 @@ The skill assumes one feature at a time in several places:
 
 ## Which specs can run in parallel
 
-"No `Depends on:` entries" is not enough. A spec can join a batch only when all of these hold:
+"No `depends_on` entries" is not enough. A spec can join a batch only when all of these hold. Each
+check reads spec frontmatter through `scripts/spec-fields.sh`:
 
-1. Every spec on its `Depends on:` line has a `Complete` status line. This is the test `status`
-   already uses to pick "next up".
-2. No spec in the batch depends on another spec in the same batch, directly or through a chain.
-3. No two specs in the batch touch the same files, config keys, commands or test file names. Two
-   specs with no dependency between them can still edit the same file and produce merge conflicts.
-   `audit` step 3 already has a "Collisions" check that can be reused for this.
-4. Each spec passes a single-spec audit (`audit` steps 1–4), as `load` does today.
+1. Every spec in its `depends_on` is `Complete` (`status`). This is the test `next` already uses.
+2. No spec in the batch depends on another spec in the same batch, directly or through a chain
+   (`order` lists the specs in dependency order).
+3. No two specs in the batch have overlapping `touches`: `overlaps <id> <id> <id>` prints nothing.
+   Two specs with no dependency between them can still edit the same file and produce merge
+   conflicts. A folder in `touches` overlaps every path inside it.
+4. Each spec passes a single-spec audit (`audit` steps 1 and 3–5), as `load` does today. That
+   includes `check`, so old-format or malformed specs are excluded until fixed.
 
 Specs that fail a check are left out of the batch, and the report says why.
 
@@ -72,7 +74,7 @@ flowchart LR
 
 - **03, 04 and 05 qualify** (blue): everything they depend on is complete, and they don't overlap.
 - **06 is excluded** (red): it depends on 03 and 04, which are unfinished. It can run after them.
-- **07 is excluded** (yellow): it has no dependencies, but its `Touches` section overlaps 05. It
+- **07 is excluded** (yellow): it has no dependencies, but its `touches` overlaps 05's. It
   can run in the next batch, or replace 05 in this one.
 
 Arrows point from a spec to the specs that depend on it. The spec names are placeholders.
@@ -236,7 +238,7 @@ main session uses only read-only git commands, such as the `diff` and `log` that
 ### Fallback
 
 If the tool can't run subagents, the action works through the batch one spec at a time, in the
-main session, using the same steps. `audit` step 5 already falls back the same way.
+main session, using the same steps. `audit` step 6 already falls back the same way.
 
 ### Failure handling
 
@@ -418,18 +420,22 @@ These changes to the skill are in place. The parallel action builds on them.
    `start`, `review`, `explain`, `complete` and `abandon` read it. The batch table generalizes this
    line.
 2. **Spec template.** `templates/spec.md` defines Context, Goals, Acceptance Criteria, Non-goals,
-   Touches, Notes and Testing. `plan` and `load` create specs from it, and `audit` and `complete`
-   use its section names. The independence check reads the `Touches` section, which `audit` keeps
-   current.
-3. **`status` patterns.** `SKILL.md` "Spec Files" defines recursive, anchored patterns that work in
-   zsh with empty folders and include `context/fixes/`. `status`, `audit`, `load` and `complete`
-   use them.
+   Notes and Testing, with `status`, `depends_on` and `touches` in YAML frontmatter (see
+   `docs/FEATURE_SKILL_FRONTMATTER_PLAN.md`). `plan` and `load` create specs from it, and `audit`
+   and `complete` use its field and section names. The independence check reads `touches`, which
+   `audit` keeps current.
+3. **Reading spec data.** `scripts/spec-fields.sh` replaced the `grep` patterns: it reads spec
+   frontmatter, works with empty or missing folders, and includes `context/fixes/`. `status`,
+   `audit`, `load`, `plan` and `complete` use it.
 4. **`review` action.** It reviews `git diff <base>...HEAD` plus uncommitted work against the spec
    and `context/coding-standards.md`, runs the project's checks, and reports a verdict, goal by goal
    status and ranked issues.
 
 ## Implementation order
 
+0. First, implement `docs/FEATURE_SKILL_FRONTMATTER_PLAN.md` (decided 2026-10-30; done). The
+   independence checks then read `status`, `depends_on` and `touches` from spec frontmatter through
+   `scripts/spec-fields.sh`, rather than from prose lines.
 1. `## Batch` section and the rule changes in `SKILL.md`, `load`, `status`, `complete` and
    `abandon`.
 2. Commit permission for subagents. Add to `SKILL.md` "Constraints" and to "Sub-agents" in

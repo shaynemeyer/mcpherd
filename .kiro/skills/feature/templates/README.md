@@ -10,7 +10,7 @@ They were created by the feature skill's `setup` action, which runs once: it ski
 - `testing-instructions.md` — meaningful test scope and exact commands.
 - `current-feature.md` — active feature state and latest completed feature.
 - `feature-history.md` — older completed-feature entries, oldest to newest. Created by the first `complete`, not by `setup`.
-- `features/` — feature specifications, following the skill's `templates/spec.md`. The `plan` action can split a plan document into these.
+- `features/` — feature specifications, following the skill's `templates/spec.md`, each starting with YAML frontmatter (`status`, `depends_on`, `touches`). The `plan` action can split a plan document into these.
 - `fixes/` — fix specifications, same structure.
 - `research/` — named research prompts.
 - `screenshots/` — optional visual references when relevant.

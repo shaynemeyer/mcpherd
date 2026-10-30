@@ -9,11 +9,12 @@
      `git pull --ff-only`. If that fails, stop and report it.
 3. Create and check out the feature branch, deriving the name from the H1 heading and following the
    naming convention in `context/ai-interaction.md`.
-4. Set Status in `context/current-feature.md` to "In Progress", and set the `**Status:**` line of
-   the spec named on the `**Spec:**` line to `In Progress`.
+4. Set Status in `context/current-feature.md` to "In Progress", and set `status: In Progress` in
+   the frontmatter of the spec named on the `**Spec:**` line.
 5. Propose the approach before writing code: the goals in the order you'll implement them, the
-   files you expect to change (compared with the spec's Touches section), and any decision the spec
-   leaves open. Wait for the user to agree or adjust it.
+   files you expect to change (compared with the spec's `touches`), and any decision the spec
+   leaves open. Wait for the user to agree or adjust it. If the agreed approach changes the files,
+   update `touches` to match.
 6. Implement the goals one at a time. After each goal, run the project's build and the targeted
    tests from `context/ai-interaction.md` and `context/testing-instructions.md`, and fix failures
    before moving to the next goal. After two failed attempts to fix the same failure, STOP and
