@@ -47,5 +47,7 @@ If the argument is "run" or "fix":
 - Then ask: "Which items would you like me to fix? (enter numbers like 1,3,5 or 'all' or 'none')"
 - Wait for the user's response before making any changes
 - Fix only the items the user specifies
-- Run the project's lint and test commands from `context/ai-interaction.md`
+- Run the project's lint and test commands from `context/ai-interaction.md`. If a fix keeps failing
+  them, STOP after two failed attempts and REPORT what happened, as "When Stuck" in
+  `context/ai-interaction.md` describes; don't keep trying.
 - Report what you changed

@@ -13,7 +13,8 @@
 2. Create a branch using the repository's established naming convention.
 3. Implement only the documented goals.
 4. Run the repository's documented targeted tests and required build or validation commands. Add meaningful tests for new logic using existing tools and patterns.
-5. Iterate on verified failures; do not make random changes.
+5. Iterate on verified failures; do not make random changes. After two failed attempts at the same
+   problem, STOP and REPORT as "When Stuck" describes.
 6. Obtain explicit permission before committing. Never add AI attribution to commit messages or
    review requests (pull or merge request titles and descriptions): no `Co-Authored-By` trailers
    for an AI model or tool, no "Generated with" lines, and no mention of the model or agent that
@@ -74,6 +75,42 @@ or excerpts of private files. Keep them out of source control.
 
 ## When Stuck
 
-- After two or three evidence-based attempts fail, stop, summarize the attempts and evidence, and ask a focused question.
+**After two failed attempts: STOP and REPORT.** This applies to every agent: the main session and
+every sub-agent.
+
+- **A failed attempt** is an approach that ends without the task done: the build or a test still
+  fails, the same error comes back, or the code doesn't behave as the task needs.
+- **STOP** after the second failed attempt at the same task. Don't try a third approach, and don't
+  repeat a failed one with small variations.
+- **REPORT** what happened, to the user from the main session, or to the orchestrator from a
+  sub-agent:
+  - the task, and the point where work stopped;
+  - each attempt: what was tried, and why it was expected to work;
+  - the evidence: the failing command and the relevant lines of its output, with file and line
+    references;
+  - the current state: which files were changed and are left in place, uncommitted;
+  - the best explanation of the cause, marked as a guess where it is one;
+  - the decision or information needed to continue, as one focused question.
+
+  Keep secrets and private data out of the report, as in "Review Output".
+- **Leave the work as it is.** Don't revert changes, delete files, or reset branches to tidy up
+  after a failure. The changes are evidence for whoever picks the task up.
+- **Wait for a decision.** Work on that task resumes only when the user gives new information or
+  chooses another way forward.
+
+Also:
+
 - Preserve unrelated changes and existing patterns.
 - Keep changes minimal and avoid unrequested refactors.
+
+## Sub-agents
+
+These rules apply to any sub-agent that a session (the orchestrator) starts to do part of the work.
+
+- **Every brief includes "When Stuck".** The orchestrator puts that section, or a pointer to it, in
+  every sub-agent's brief.
+- **Report instead of asking.** A sub-agent can't ask the user a question mid-run. After two failed
+  attempts it STOPS and ends its run with the report from "When Stuck" rather than guessing.
+- **The orchestrator doesn't retry on its own.** It doesn't restart a blocked sub-agent with the
+  same brief. It passes the report to the user, who chooses to retry with new information, finish
+  the task in the main session, or drop it. A retried sub-agent gets its own two attempts.
