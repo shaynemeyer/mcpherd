@@ -1,7 +1,7 @@
 # mcpherd
 
 A terminal MCP client for Ollama and OpenAI-compatible LLMs, written in Go, preferring the standard
-library. Status: planning, no code yet. The design and phases are in `docs/GO_PORT_PLAN.md`.
+library. Status: planning, no code yet. The design and phases are in `docs/plans/GO_PORT_PLAN.md`.
 
 ## Context Files
 

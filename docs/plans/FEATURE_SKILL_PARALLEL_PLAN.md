@@ -1,6 +1,7 @@
 # Feature Skill: Parallel Workflow Plan
 
-**Status:** Draft, not started. The open questions are answered; see "Decisions".
+**Status:** Implemented 2026-10-30 (implementation order steps 1–5). Step 6, the trial run in
+both tools, is still to do.
 
 This plan covers changes to the `feature` skill in `.kiro/skills/feature/`. Claude Code reads the
 same files through the `.claude/skills/feature` symlink. It is not part of mcpherd itself.
@@ -421,7 +422,7 @@ These changes to the skill are in place. The parallel action builds on them.
    line.
 2. **Spec template.** `templates/spec.md` defines Context, Goals, Acceptance Criteria, Non-goals,
    Notes and Testing, with `status`, `depends_on` and `touches` in YAML frontmatter (see
-   `docs/FEATURE_SKILL_FRONTMATTER_PLAN.md`). `plan` and `load` create specs from it, and `audit`
+   `docs/plans/FEATURE_SKILL_FRONTMATTER_PLAN.md`). `plan` and `load` create specs from it, and `audit`
    and `complete` use its field and section names. The independence check reads `touches`, which
    `audit` keeps current.
 3. **Reading spec data.** `scripts/spec-fields.sh` replaced the `grep` patterns: it reads spec
@@ -433,7 +434,7 @@ These changes to the skill are in place. The parallel action builds on them.
 
 ## Implementation order
 
-0. First, implement `docs/FEATURE_SKILL_FRONTMATTER_PLAN.md` (decided 2026-10-30; done). The
+0. First, implement `docs/plans/FEATURE_SKILL_FRONTMATTER_PLAN.md` (decided 2026-10-30; done). The
    independence checks then read `status`, `depends_on` and `touches` from spec frontmatter through
    `scripts/spec-fields.sh`, rather than from prose lines.
 1. `## Batch` section and the rule changes in `SKILL.md`, `load`, `status`, `complete` and

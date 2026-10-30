@@ -114,3 +114,20 @@ These rules apply to any sub-agent that a session (the orchestrator) starts to d
 - **The orchestrator doesn't retry on its own.** It doesn't restart a blocked sub-agent with the
   same brief. It passes the report to the user, who chooses to retry with new information, finish
   the task in the main session, or drop it. A retried sub-agent gets its own two attempts.
+- **Commits only in a parallel batch.** Sub-agents don't commit, except in the feature skill's
+  `parallel` action: there, the user's approval of the batch is the explicit permission (Workflow
+  step 6) for each sub-agent to commit to the branch the orchestrator created for it, once the
+  build, lint and tests pass. A sub-agent never creates or removes worktrees, pushes, merges or
+  deletes branches.
+- **Git rules in a shared repository.** A sub-agent working in a git worktree shares one `.git`
+  folder with every other worktree, so its brief includes these rules:
+  - Allowed: `git status`, `git diff`, `git log`, `git add` and `git commit`, inside its own
+    worktree only.
+  - Commit as `git -c gc.auto=0 -c maintenance.auto=false commit ...`, so git doesn't start `gc`
+    or maintenance on the shared object store. The flags apply to that command only.
+  - Not allowed: `stash`, `fetch`, `pull`, `push`, `merge`, `rebase`, `reset`, `checkout` or
+    `switch` of another branch, `branch -d`/`-D`, `gc`, `config`, `pack-refs`, and
+    `worktree add`/`remove`.
+  - Never delete a `.lock` file: it can belong to a git command that is still running.
+  - A lock error counts as the first failed attempt; retry once after a few seconds, and if that
+    fails, STOP and REPORT with the changes left uncommitted.

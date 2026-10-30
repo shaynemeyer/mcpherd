@@ -7,7 +7,7 @@ They were created by the feature skill's `setup` action, which runs once: it ski
 - `project-overview.md` — evidenced project purpose, users, architecture, data, and technology.
 - `coding-standards.md` — conventions derived from the repository.
 - `ai-interaction.md` — communication, workflow, git, and validation guidance.
-- `testing-instructions.md` — meaningful test scope and exact commands.
+- `testing-instructions.md` — meaningful test scope and exact commands, ending with "Parallel Safety": whether the checks can run in several git worktrees at once, which the `parallel` action reads.
 - `current-feature.md` — active feature state and latest completed feature.
 - `feature-history.md` — older completed-feature entries, oldest to newest. Created by the first `complete`, not by `setup`.
 - `features/` — feature specifications, following the skill's `templates/spec.md`, each starting with YAML frontmatter (`status`, `depends_on`, `touches`). The `plan` action can split a plan document into these.

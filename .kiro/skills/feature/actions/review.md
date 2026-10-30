@@ -3,7 +3,9 @@
 Read-only apart from running the project's checks. Never fixes code; it reports.
 
 1. Read `context/current-feature.md`, the spec named on its `**Spec:**` line,
-   `context/coding-standards.md` and `context/ai-interaction.md`.
+   `context/coding-standards.md` and `context/ai-interaction.md`. During a batch (`**Spec:** batch`),
+   take the spec from its `## Batch` row and review in its worktree: use `git -C <worktree>` below,
+   with the `**Base:**` sha as `<base>`, and run the checks from inside the worktree.
 2. Collect the changes: `git diff <base>...HEAD` for committed work, plus `git diff` and
    `git status --porcelain` for uncommitted and untracked files. `<base>` is the base branch named in
    `context/ai-interaction.md`; ask if it isn't recorded. Read the full changed files where the diff

@@ -33,3 +33,6 @@ go.work.sum
 
 # Review output
 .reviews/
+
+# Parallel worktrees
+.worktrees/

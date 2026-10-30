@@ -6,7 +6,7 @@ mcpherd is a terminal MCP client for Ollama and OpenAI-compatible LLMs, written 
 chat model to MCP servers and lets the model call their tools. It aims for a single static binary
 that mostly uses the standard library.
 
-Status: planning. No Go code exists yet. The design is in `docs/GO_PORT_PLAN.md`.
+Status: planning. No Go code exists yet. The design is in `docs/plans/GO_PORT_PLAN.md`.
 
 ## Users
 
@@ -18,7 +18,7 @@ establish anything more specific about users.
 
 Implemented: none.
 
-Planned (from `README.md` and `docs/GO_PORT_PLAN.md`, in 13 phases, 0–12):
+Planned (from `README.md` and `docs/plans/GO_PORT_PLAN.md`, in 13 phases, 0–12):
 
 - Chat with Ollama models and OpenAI-compatible providers, with streaming.
 - MCP servers over stdio, streamable HTTP and SSE.
@@ -31,7 +31,7 @@ Planned (from `README.md` and `docs/GO_PORT_PLAN.md`, in 13 phases, 0–12):
 
 ## Architecture and Data
 
-Planned layout (`docs/GO_PORT_PLAN.md`, "Architecture"):
+Planned layout (`docs/plans/GO_PORT_PLAN.md`, "Architecture"):
 
 - `cmd/mcpherd`: entry point.
 - `internal/cli` (flags, subcommands), `internal/app` (REPL, slash commands), `internal/agent`

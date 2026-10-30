@@ -139,7 +139,7 @@ other line, and never rewrite the whole block. After writing, the action re-read
 | `actions/complete.md` | Step 7 sets `status: Complete` and `merged: YYYY-MM-DD (<sha>)`; step 10 finds dependents with the script instead of reading prose, and adds this spec to a spec's `depends_on` when it depends on it without saying so |
 | `actions/abandon.md` | Set `status: Not Started` |
 | `README.md`, `templates/README.md` | Describe the frontmatter as a fixed convention |
-| `docs/FEATURE_SKILL_PARALLEL_PLAN.md` | Independence checks 1–3 read `depends_on`, `status` and `touches` through the script; drop the prose-based caveats |
+| `docs/plans/FEATURE_SKILL_PARALLEL_PLAN.md` | Independence checks 1–3 read `depends_on`, `status` and `touches` through the script; drop the prose-based caveats |
 
 ## Migration
 
@@ -192,7 +192,7 @@ the source of truth.
 3. The actions, in this order: `plan`, `load`, `start`, `status`, `audit` (including conversion),
    `complete`, `abandon`.
 4. `README.md`, `templates/README.md`, and the parallel plan's independence checks.
-5. Trial: run `plan` on `docs/GO_PORT_PLAN.md`, then `status`, `audit` and a `load`. Check the
+5. Trial: run `plan` on `docs/plans/GO_PORT_PLAN.md`, then `status`, `audit` and a `load`. Check the
    reported next up and dependency order by hand.
 
 ## Decisions
@@ -233,5 +233,5 @@ dependency cycle and `SPEC_DIRS`. All pass on macOS (BSD `awk` 20200816, `/bin/s
 (`dash`, `mawk`) and Alpine (BusyBox `sh` and `awk`), the last two run in Podman containers. Windows
 (Git Bash) is not tested.
 
-The trial in "Implementation order" step 5, running `plan` on `docs/GO_PORT_PLAN.md`, has not been
+The trial in "Implementation order" step 5, running `plan` on `docs/plans/GO_PORT_PLAN.md`, has not been
 done yet.

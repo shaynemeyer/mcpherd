@@ -1,6 +1,6 @@
 ---
 name: feature
-description: Manage the current feature workflow — set up a project's context files, split a plan into feature specs, report status, audit specs against the code, load a spec, start implementation, review, test, explain, complete, or abandon a feature. Use when the user asks to set up the feature workflow in a project, to turn a plan document into specs, for feature status or progress, to audit or check specs for drift, or to load/start/review/test/explain/complete/abandon a feature or fix, or refers to the feature lifecycle tracked in context/current-feature.md.
+description: Manage the current feature workflow — set up a project's context files, split a plan into feature specs, report status, audit specs against the code, load a spec, start implementation, run several independent specs in parallel in sub-agents and git worktrees, review, test, explain, complete, or abandon a feature. Use when the user asks to set up the feature workflow in a project, to turn a plan document into specs, for feature status or progress, to audit or check specs for drift, to load/start/review/test/explain/complete/abandon a feature or fix, to implement several specs at once or in parallel, or refers to the feature lifecycle tracked in context/current-feature.md.
 ---
 
 # Feature Workflow
@@ -14,8 +14,9 @@ creates it.
 `context/current-feature.md` has these parts:
 
 - `# Current Feature` — H1 heading, includes the feature name when a feature is active
-- `**Spec:**` — the line under the H1: the path of the loaded spec file, or `none`. `load` writes it;
-  `start`, `review`, `complete` and `abandon` read it to find the spec
+- `**Spec:**` — the line under the H1: the path of the loaded spec file, `none`, or `batch` while a
+  parallel batch is active. `load` writes it; `start`, `review`, `complete` and `abandon` read it to
+  find the spec
 - `## Status` — Not Started | In Progress | Complete. `complete` resets this to "Not Started" and
   records the feature under History, so "Complete" is only ever a transient value
 - `## Goals` — bullet points of what success looks like
@@ -24,6 +25,15 @@ creates it.
   currently loaded. Exactly one entry. `complete` moves any prior entry to
   `context/feature-history.md` (the archive, oldest to newest) before writing the new one, so this
   section never accumulates
+- `## Batch` — present only while a `parallel` batch is active, between Notes and History: the base
+  commit and one table row per spec with its branch, worktree and state. During a batch the H1
+  lists the spec ids, `**Spec:**` reads `batch`, and Goals and Notes hold one subsection per spec.
+  `actions/parallel.md` ("Batch record") defines the format and states.
+
+**While a batch is active**, `start` and `load` refuse to run. `review`, `test`, `explain`,
+`complete` and `abandon` take a spec id (for example `review 04-name`), find that spec's row under
+`## Batch`, and work in its worktree: run git as `git -C <worktree> ...` and the project's checks
+from inside the worktree. Without an id they list the batch specs and ask which one.
 
 ## Work Log
 
@@ -107,8 +117,10 @@ that meets one stops before changing anything, names the spec, and says to run `
 converts it. Don't read the old lines.
 
 **`In Progress` has a single holder:** the spec named on the `**Spec:**` line of
-`context/current-feature.md`. Any other spec in `in-progress` is stale, left by an attempt that
-was abandoned without running `abandon`. `load` resets stale markers, and `status` reports them.
+`context/current-feature.md`, unless a batch is active, in which case every spec listed under
+`## Batch` holds it. Any other spec in `in-progress`, named in neither place, is stale, left by an
+attempt that was abandoned without running `abandon`. `load` resets stale markers, and `status`
+reports them.
 
 Completed specs stay in place rather than moving to an archive folder: later features keep building
 on them (a spec that sets up core types or configuration is referenced by most of what follows), and
@@ -126,6 +138,7 @@ The user names one action. Determine which from their request.
 | `audit`    | Check unfinished specs against the code and each other; fix drift in spec files only (`audit <nn-name>` for one) |
 | `load`     | Audit, then load a feature spec, or write a spec from an inline description and load it |
 | `start`    | Prepare the branch, confirm the approach, implement        |
+| `parallel` | Implement up to 3 independent specs at once, each in a sub-agent on its own branch and git worktree (`parallel <nn-name> ...`) |
 | `review`   | Check the diff against the spec and standards; give a verdict |
 | `test`     | Write or verify tests for the feature's new logic          |
 | `explain`  | Document what changed and why                             |
@@ -166,6 +179,11 @@ marker as the first line of the template when editing it.
   stack-specific commands or assumptions here.
 - Never commit, merge, push, or delete a branch without explicit permission, and never before the
   build passes. This overrides any looser wording in the action files.
+- One exception, for `parallel` only: approving a batch is the explicit permission for each of its
+  sub-agents to commit to the branch the main session created for it, once its build, lint and
+  tests pass. Nothing else changes. No sub-agent creates or removes worktrees, pushes, merges or
+  deletes branches, and each follows the git rules in `actions/parallel.md` ("Git in a shared
+  repository").
 - After two failed attempts at the same task, STOP and REPORT, as "When Stuck" in
   `context/ai-interaction.md` describes. This applies in every action, to the main session and to
   every sub-agent, and every sub-agent brief must include it.

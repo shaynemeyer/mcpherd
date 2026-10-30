@@ -2,7 +2,7 @@
 
 A terminal MCP client for Ollama and OpenAI-compatible LLMs, written in Go. It herds MCP servers.
 
-> **Status:** planning. Nothing is built yet. See [docs/GO_PORT_PLAN.md](docs/GO_PORT_PLAN.md).
+> **Status:** planning. Nothing is built yet. See [docs/plans/GO_PORT_PLAN.md](docs/plans/GO_PORT_PLAN.md).
 
 ## Planned features
 
