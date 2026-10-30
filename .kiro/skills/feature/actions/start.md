@@ -16,6 +16,7 @@
    leaves open. Wait for the user to agree or adjust it.
 6. Implement the goals one at a time. After each goal, run the project's build and the targeted
    tests from `context/ai-interaction.md` and `context/testing-instructions.md`, and fix failures
-   before moving to the next goal.
+   before moving to the next goal. After two failed attempts to fix the same failure, STOP and
+   REPORT as "When Stuck" describes; don't move on to the next goal.
 7. When all goals are done, run the full set of checks and report what was built, what was verified,
    and anything that deviated from the spec. Suggest `review` next.

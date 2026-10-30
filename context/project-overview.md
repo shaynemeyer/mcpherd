@@ -61,6 +61,6 @@ project root. There is no database.
 - No code, `go.mod`, tests or CI exist, so every command and package path above is planned, not
   verified.
 - Minimum supported Go version and target platforms beyond "Windows CI from Phase 4" are not set.
-- Merge style for pull requests (merge commit, squash or rebase) is not established. Branch naming,
+- Merge style for pull requests is a merge commit. Branch naming,
   commit subjects and treating `main` as protected are recorded in `context/ai-interaction.md`.
 - Whether the MCP HTTP/SSE transports are hand-written or use the go-sdk is open until Phase 5.

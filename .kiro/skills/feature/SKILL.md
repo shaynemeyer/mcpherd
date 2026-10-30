@@ -121,3 +121,6 @@ marker as the first line of the template when editing it.
   stack-specific commands or assumptions here.
 - Never commit, merge, push, or delete a branch without explicit permission, and never before the
   build passes. This overrides any looser wording in the action files.
+- After two failed attempts at the same task, STOP and REPORT, as "When Stuck" in
+  `context/ai-interaction.md` describes. This applies in every action, to the main session and to
+  every sub-agent, and every sub-agent brief must include it.

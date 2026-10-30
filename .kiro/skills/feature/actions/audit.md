@@ -59,7 +59,8 @@ Two scopes share the checks below:
      it by name. Show the user these decisions before applying them across specs.
    - Never change a `**Status:**` line.
 5. A full audit covers many specs. If the tool supports sub-agents, split the reading across them
-   by spec range; otherwise work through the specs in order. Either way, settle
+   by spec range, and include "When Stuck" from `context/ai-interaction.md` in each brief;
+   otherwise work through the specs in order. Either way, settle
    the cross-cutting decisions first, apply the same list everywhere, and review the result for
    consistency before reporting.
 6. Report: specs changed, with the gist of each edit; decisions made, and which spec now owns each;

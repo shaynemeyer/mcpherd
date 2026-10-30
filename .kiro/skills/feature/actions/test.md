@@ -15,5 +15,6 @@
      generated code.
    - Do not write tests just to write them. Use your best judgement.
 6. Run the project's test and build commands as documented in `context/ai-interaction.md` and
-   confirm they pass.
+   confirm they pass. After two failed attempts to make the same test pass, STOP and REPORT as
+   "When Stuck" describes.
 7. Report what was tested and any gaps in coverage.
