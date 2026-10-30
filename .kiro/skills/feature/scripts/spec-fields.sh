@@ -36,6 +36,8 @@ rows() {
     awk -v file="$f" '
       BEGIN { n = split(file, p, "/"); id = p[n]; sub(/\.md$/, "", id); state = 0; key = "" }
       function err(msg) { print id "\t_error\t" msg }
+      # Windows checkouts can have CRLF line endings; drop the carriage return first.
+      { sub(/\r$/, "") }
       NR == 1 {
         if ($0 == "---") { state = 1 }
         else { state = 3; err("no frontmatter (old format? run audit to convert)") }

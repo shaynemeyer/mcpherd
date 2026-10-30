@@ -227,6 +227,19 @@ expect "check: reports the cycle" "dependency cycle: 01-a 02-b" \
 "$(run cycle check | sed 's/02-b 01-a/01-a 02-b/')"
 expect "next: nothing is ready in a cycle" "" "$(run cycle next)"
 
+# --- Scenario "crlf": specs saved with Windows line endings -------------------------------
+mkdir -p "$work/crlf/context/features"
+printf -- '---\r\nstatus: Complete\r\nmerged: 2026-11-02 (abc1234)\r\ndepends_on: []\r\ntouches:\r\n  - internal/llm/\r\n---\r\n\r\n# Core\r\n' \
+  > "$work/crlf/context/features/01-core.md"
+printf -- '---\r\nstatus: Not Started\r\ndepends_on:\r\n  - 01-core\r\ntouches:\r\n  - internal/llm/ollama/client.go\r\n---\r\n\r\n# Chat\r\n' \
+  > "$work/crlf/context/features/02-chat.md"
+expect "crlf: status values have no carriage return" \
+"$(printf '01-core\tComplete\n02-chat\tNot Started')" "$(run crlf status)"
+expect "crlf: next" "02-chat" "$(run crlf next)"
+expect "crlf: overlaps" "$(printf 'internal/llm/ollama/client.go\t01-core\t02-chat')" "$(run crlf overlaps)"
+expect "crlf: check reports nothing" "" "$(run crlf check)"
+expect_exit "crlf: check exits 0" 0 crlf check
+
 # --- SPEC_DIRS override ---------------------------------------------------------------------
 expect "SPEC_DIRS limits the folders" "05-stdio-hang" \
 "$(cd "$work/good" && SPEC_DIRS=context/fixes sh "$script" outstanding)"

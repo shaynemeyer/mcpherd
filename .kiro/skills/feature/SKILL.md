@@ -86,8 +86,20 @@ root (`sh <skill-dir>/scripts/spec-fields.sh <command>`). Don't grep spec files 
 | `check` | every problem: missing or malformed frontmatter, unknown status, bad `merged`, `depends_on` naming a missing spec, cycles, old-format lines; exits 1 if any |
 | `fields` | every raw value, for anything the commands above don't cover |
 
-The script needs only `sh`, `awk`, `find` and `sort`, and handles empty or missing folders. If no
-shell is available, read the frontmatter blocks directly; the format rules make them unambiguous.
+The script needs only `sh`, `awk`, `find` and `sort`, and handles empty or missing folders and
+Windows (CRLF) line endings. If no shell is available, read the frontmatter blocks directly; the
+format rules make them unambiguous.
+
+**On Windows**, run the script under Git Bash, which comes with Git for Windows. Claude Code
+already runs its commands there. From PowerShell or cmd, where `sh` is usually not on the PATH,
+call Git's `sh` by its path, from the repository root:
+
+```powershell
+& "C:\Program Files\Git\bin\sh.exe" <skill-dir>/scripts/spec-fields.sh <command>
+```
+
+Don't run the script's pieces directly in PowerShell or cmd: there, `find` and `sort` are
+Windows' own `find.exe` and `sort.exe`, which behave differently. WSL works like Linux.
 
 **Old-format specs.** A spec without frontmatter, carrying `**Status:**` and `**Depends on:**`
 lines instead, comes from before this format. `check` reports it as "no frontmatter". Any action
