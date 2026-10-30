@@ -45,10 +45,10 @@ Find the spec from the `**Spec:**` line of `context/current-feature.md`.
 
 6. Create the completion branch from the updated `<base>`, named per the project's convention
    (default `chore/feature-<nn>-completion`).
-7. Mark the spec complete: set the `**Status:**` line under the H1 of the spec named on the
-   `**Spec:**` line to `Complete — merged YYYY-MM-DD (<merge commit sha>)`. It will read
-   `In Progress` at this point, because `start` wrote that. Replace the whole line rather than
-   appending to it.
+7. Mark the spec complete. In the frontmatter of the spec named on the `**Spec:**` line, change
+   `status: In Progress` (which `start` wrote) to `status: Complete`, and add the line
+   `merged: YYYY-MM-DD (<merge commit sha>)` directly after it. Then run
+   `scripts/spec-fields.sh check` and confirm it reports nothing for this spec.
 8. Roll the history forward, in this order. The move must happen before the new entry is written,
    or the archive ends up out of order:
    - If `## History` in `context/current-feature.md` already holds an entry, append it to the END
@@ -86,17 +86,16 @@ Find the spec from the `**Spec:**` line of `context/current-feature.md`.
     step a later spec still describes a world this feature has already changed.
 
     - **Check every unfinished spec, not only the dependents.** Any outstanding spec could be the
-      next one worked, so all of them are in scope. List every spec in `context/features/` and
-      `context/fixes/` whose status line is not `Complete` (outstanding pattern from `SKILL.md`;
-      `In Progress` and `Not Started` both count), and check each one against what this feature
-      changed or learned. Start with the dependents, whose `Depends on:` line names this feature by
-      filename, by number, or inside a range such as "features 91–99". The line has no single
-      format, so read it rather than grepping for the filename. Then go through the rest: a spec
+      next one worked, so all of them are in scope. List them with
+      `scripts/spec-fields.sh outstanding` (`In Progress` and `Not Started` both count), and check
+      each one against what this feature changed or learned. Start with the dependents,
+      `scripts/spec-fields.sh dependents <this spec's id>`. Then go through the rest: a spec
       with no declared dependency is still affected if it relies on something this feature changed,
       such as a file, an interface or data shape, a config key, a command, or a decision it
-      superseded.
-      If a spec turns out to depend on this feature without saying so, add this feature to its
-      `Depends on:` line as well.
+      superseded. `scripts/spec-fields.sh overlaps` shows specs whose `touches` include files this
+      feature changed.
+      If a spec turns out to depend on this feature without saying so, add this feature's id to its
+      `depends_on` as well.
     - **Decide what carries.** Use the work-log entry from step 9 as the source, not the spec.
       Carry what a later feature would get wrong without being told: deviations from this spec,
       renamed or reshaped interfaces, bugs found and how they are now pinned, constraints
@@ -104,10 +103,11 @@ Find the spec from the `**Spec:**` line of `context/current-feature.md`.
       first to exercise. Leave out what a given spec does not touch.
     - **Write it into each affected spec.** Add a bullet under its `## Notes` section headed
       `**What \`<nn>\` turned up that this feature must carry**`, naming the work-log entry as the
-      source. Notes and `Touches` may be updated without asking. A
+      source. Notes, `touches` and `depends_on` may be updated without asking. A
       finding that changes a spec's Goals, Acceptance Criteria or Non-goals is a change to
       what will be built: propose the edit, get the user's agreement, then make it in place with
-      `(updated YYYY-MM-DD after <nn>)`. Never change another spec's `**Status:**` line here.
+      `(updated YYYY-MM-DD after <nn>)`. Never change another spec's `status` here. Run
+      `scripts/spec-fields.sh check` after the edits.
     - **Source plans and registers.** If the plan document this feature came from (named in its
       spec's `## Context` section), or any register the project keeps of open items, describes
       something this feature changed or closed, update that too.
@@ -116,7 +116,7 @@ Find the spec from the `**Spec:**` line of `context/current-feature.md`.
     - **Report what carried.** List each spec touched and the gist of what was added. If nothing
       needed carrying, say so explicitly rather than adding empty notes.
 
-11. Commit the status line, the reset, the work log and the forward notes from step 10 together,
+11. Commit the spec's frontmatter change, the reset, the work log and the forward notes from step 10 together,
     following the commit convention in `context/ai-interaction.md` (default subject:
     `chore: reset current-feature.md after completing [feature]`).
 12. Push the chore branch and open its review request, as in steps 3–4, writing its copy the same

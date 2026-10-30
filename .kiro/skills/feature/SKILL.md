@@ -40,37 +40,67 @@ here is written for someone arriving cold.
 ## Spec Files
 
 Feature specs live in `context/features/{nn-name}.md` (fixes in `context/fixes/`), numbered in
-dependency order. Every spec follows `templates/spec.md`. Each carries a status line directly
-under its H1:
+dependency order across both folders. The filename without `.md` is the spec's id. Every spec
+follows `templates/spec.md`, and starts with YAML frontmatter holding the data actions read:
 
 ```markdown
-# Feature Title
+---
+status: Not Started
+depends_on:
+  - 01-core-types
+touches:
+  - internal/llm/ollama/
+  - cmd/mcpherd/main.go
+---
 
-**Status:** Not Started
+# Feature Title
 ```
 
-Three values are used: `Not Started`, `In Progress` which `start` writes, and
-`Complete — merged YYYY-MM-DD (<sha>)` which `complete` writes.
+- `status`: `Not Started`, `In Progress` which `start` writes, or `Complete` which `complete`
+  writes.
+- `merged`: present only with `status: Complete`, as `YYYY-MM-DD (<sha>)`, written by `complete`.
+- `depends_on`: ids of the specs whose output this one uses, or `[]`.
+- `touches`: file and folder paths the spec creates or changes, relative to the repository root,
+  with a trailing `/` for a folder, or `[]` while unknown.
+
+Frontmatter is the only copy of these values. The body has no `**Status:**` or `**Depends on:**`
+line and no `## Touches` section.
+
+**Format rules.** The first line is `---`, and the block ends at the next `---`. One `key: value`
+per line, with no quotes and no comments. A list is the key alone, followed by one `  - item` line
+per item (two spaces, dash, space), or `key: []` when empty. Edit values in place, one line at a
+time, rather than rewriting the block.
+
+**Reading specs.** Use `scripts/spec-fields.sh` in this skill's directory, run from the repository
+root (`sh <skill-dir>/scripts/spec-fields.sh <command>`). Don't grep spec files for these values.
+
+| Command | Prints |
+| --- | --- |
+| `status` | each spec id and its status |
+| `outstanding` | ids not yet `Complete` (`Not Started` or `In Progress`) |
+| `complete` / `in-progress` | ids with that status |
+| `next` | the lowest-numbered outstanding spec whose dependencies are all `Complete` |
+| `dependents <id>` | specs whose `depends_on` includes `<id>` |
+| `order` | every id in dependency order; exits 1 and names the specs on a cycle |
+| `overlaps [<id>...]` | pairs of specs whose `touches` overlap, a folder overlapping every path inside it |
+| `check` | every problem: missing or malformed frontmatter, unknown status, bad `merged`, `depends_on` naming a missing spec, cycles, old-format lines; exits 1 if any |
+| `fields` | every raw value, for anything the commands above don't cover |
+
+The script needs only `sh`, `awk`, `find` and `sort`, and handles empty or missing folders. If no
+shell is available, read the frontmatter blocks directly; the format rules make them unambiguous.
+
+**Old-format specs.** A spec without frontmatter, carrying `**Status:**` and `**Depends on:**`
+lines instead, comes from before this format. `check` reports it as "no frontmatter". Any action
+that meets one stops before changing anything, names the spec, and says to run `audit`, which
+converts it. Don't read the old lines.
 
 **`In Progress` has a single holder:** the spec named on the `**Spec:**` line of
-`context/current-feature.md`. Any other spec marked `In Progress` is stale, left by an attempt that
+`context/current-feature.md`. Any other spec in `in-progress` is stale, left by an attempt that
 was abandoned without running `abandon`. `load` resets stale markers, and `status` reports them.
-
-To list specs by status, use these patterns. They are anchored to the status line so a spec that
-mentions "Complete" in prose isn't miscounted. They search the folders recursively rather than with
-a `*.md` glob, because zsh aborts on a glob that matches nothing, and `context/fixes/` may be empty
-or missing.
-
-- outstanding (Not Started or In Progress):
-  `grep -rL --include='*.md' '^\*\*Status:\*\*.*Complete' context/features context/fixes 2>/dev/null`
-- complete:
-  `grep -rl --include='*.md' '^\*\*Status:\*\*.*Complete' context/features context/fixes 2>/dev/null`
-- in progress:
-  `grep -rl --include='*.md' '^\*\*Status:\*\*.*In Progress' context/features context/fixes 2>/dev/null`
 
 Completed specs stay in place rather than moving to an archive folder: later features keep building
 on them (a spec that sets up core types or configuration is referenced by most of what follows), and
-each spec's `Depends on:` line names siblings by filename.
+their ids appear in other specs' `depends_on`.
 
 ## Actions
 
@@ -91,9 +121,9 @@ The user names one action. Determine which from their request.
 | `abandon`  | Stop the loaded feature without merging: reset its spec and `current-feature.md`, and deal with its branch |
 
 Before executing, read the matching instruction file for the full steps: `actions/{action}.md` in
-this skill's directory. Paths in the action files that start `actions/` or `templates/` are relative
-to that directory, wherever the skill is installed (for example `.kiro/skills/feature/` or
-`.claude/skills/feature/`, or one symlinked to the other).
+this skill's directory. Paths in the action files that start `actions/`, `templates/` or `scripts/`
+are relative to that directory, wherever the skill is installed (for example `.kiro/skills/feature/`
+or `.claude/skills/feature/`, or one symlinked to the other).
 
 If the user did not specify an action, list the options above and ask which they want.
 
@@ -104,8 +134,11 @@ If the user did not specify an action, list the options above and ask which they
 - `ai-interaction.md`, `project-overview.md`, `current-feature.md`, and `README.md`: the starting
   files `setup` copies into `context/`. They are deliberately generic; `setup` tailors them to
   repository evidence.
-- `spec.md`: the structure of every feature and fix spec. `plan` and `load` create specs from it;
-  `audit` and `complete` rely on its section names.
+- `spec.md`: the structure of every feature and fix spec, frontmatter included. `plan` and `load`
+  create specs from it; `audit` and `complete` rely on its field and section names.
+
+`scripts/` holds `spec-fields.sh`, which reads spec frontmatter (see "Spec Files"), and
+`test-spec-fields.sh`, its tests. Run the tests after changing the script.
 
 `templates/ai-interaction.md` starts with a marker comment, `<!-- feature-skill: untailored -->`.
 `setup` removes it while tailoring the copy in `context/`. A `context/ai-interaction.md` that exists,

@@ -20,7 +20,7 @@ is recorded under `## History` or in `docs/work-log.md`, because nothing was com
 4. Ask whether the attempt taught anything worth keeping, such as a wrong assumption in the spec or
    a constraint found in the code. If so, add it to the spec's `## Notes` as
    `**Abandoned YYYY-MM-DD:** <reason and findings>`, so the next attempt starts with it.
-5. Reset the spec's `**Status:**` line to `Not Started`.
+5. Reset the spec's frontmatter to `status: Not Started`.
 6. Reset `context/current-feature.md`: H1 back to `# Current Feature`, `**Spec:**` back to `none`,
    Status to "Not Started", and Goals and Notes cleared back to their placeholder comments. Leave
    `## History` unchanged.

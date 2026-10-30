@@ -4,15 +4,16 @@ Read-only. Never modifies a file, never touches git state, never asks for permis
 
 1. Read `context/current-feature.md` — the H1 and `## Status`, plus the `## History` entry (the
    previously completed feature).
-2. Count progress across specs in `context/features/` and `context/fixes/`, using the anchored,
-   recursive patterns in the Spec Files section of `SKILL.md`. Don't switch to a `*.md` glob or
-   drop the anchor: the glob fails in zsh when a folder is empty, and an unanchored pattern
-   miscounts specs that mention "Complete" or "In Progress" in prose.
+2. Count progress across specs with `scripts/spec-fields.sh` (see the Spec Files section of
+   `SKILL.md`): `status` for the totals, `in-progress`, and `next`.
    - in progress: at most one, and it should be the spec on the `**Spec:**` line of
      `context/current-feature.md`. More than one, or one that disagrees with that line, is a stale
      marker from an abandoned attempt: report it as an anomaly rather than quietly fixing it, since
      it usually means a branch was left behind too. Suggest `abandon` or `load` to clear it.
-   - the next feature is the lowest-numbered outstanding spec whose dependencies are all complete.
+   - next up: the id `next` prints. If it prints nothing while specs are outstanding, every
+     remaining spec waits on an unfinished one; say which.
+   - problems: run `check`. Report its findings in one line (for example "2 specs need `audit`"),
+     without fixing them. Old-format specs and dependency cycles go here.
 3. Report git state: current branch, uncommitted change count, commits not pushed to its upstream.
 4. Report gate state using the commands in `context/ai-interaction.md`. Run them only if they are
    fast; if a gate is slow or needs a service that is not running, say it was not checked rather
@@ -28,6 +29,7 @@ orient quickly, so a long report defeats it.
 ```
 Current:   <feature name and status, or "nothing loaded">
 Progress:  <n> of <total> complete — next up <nn-name>
+Specs:     <"ok", or what check found, e.g. "2 need audit (old format)">
 Git:       <branch>, <clean | n uncommitted>, <n unpushed>
 Gates:     <the project's checks, e.g. build / lint / tests, or "not checked (reason)">
 Previous:  <feature from History>

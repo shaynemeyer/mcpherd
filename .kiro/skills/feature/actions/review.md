@@ -12,7 +12,7 @@ Read-only apart from running the project's checks. Never fixes code; it reports.
    results rather than trusting earlier reports.
 4. Check the changes against:
    - **The spec:** each goal and acceptance criterion is met, partly met or missing. Code beyond the
-     goals or inside the Non-goals is scope creep. Files changed outside the Touches section are
+     goals or inside the Non-goals is scope creep. Files changed outside the spec's `touches` are
      worth a note.
    - **Correctness:** logic errors, unhandled errors and edge cases, broken existing behavior.
    - **Security:** input validation at trust boundaries, secrets in code or logs, unsafe use of

@@ -17,17 +17,24 @@ Splits a plan document into multiple feature specs under `context/features/` (or
 3. Order the units by dependency; a unit that consumes another's output comes after it.
 4. Check `context/features/` and `context/fixes/` for the highest existing
    numeric prefix and for specs that already cover part of this plan — skip or note
-   any overlap instead of duplicating it.
+   any overlap instead of duplicating it. If `scripts/spec-fields.sh check` reports an
+   old-format spec, stop and say to run `audit` first.
 5. For each unit, create `context/features/<nn-name>.md` (or under `context/fixes/`)
-   following `templates/spec.md`: H1, `**Status:** Not Started`, `**Depends on:**`
-   (`none` or sibling filenames without extension), and every section in the template.
-   Reference the source plan (path, or "provided inline") and the section it covers
-   under `Context`. Populate only facts supported by the plan; carry over exact
-   code/signatures rather than paraphrasing them away. Fill `Touches` with your best
-   estimate of the files and config the unit changes. Leave a section's placeholder
-   comment in place, rather than inventing content, when the plan says nothing about it.
-6. Do not update `context/current-feature.md` and do not create a branch.
-7. Report the specs created, in dependency order, with a one-line description each,
-   plus any plan sections skipped as already covered. Suggest running `audit` across the new
-   specs before the first one is loaded, then tell the user to load whichever one they want to
-   start with (`feature load <nn-name>`).
+   following `templates/spec.md`. Frontmatter: `status: Not Started`; `depends_on` listing
+   the ids of the specs it builds on, or `[]`; `touches` listing your best estimate of the
+   file and folder paths it creates or changes, or `[]` if the plan doesn't say. Then the
+   H1 and every section in the template. Reference the source plan (path, or "provided
+   inline") and the section it covers under `Context`. Populate only facts supported by the
+   plan; carry over exact code/signatures rather than paraphrasing them away. Leave a
+   section's placeholder comment in place, rather than inventing content, when the plan
+   says nothing about it.
+6. Run `scripts/spec-fields.sh check` and `scripts/spec-fields.sh order`. Fix any problem in
+   the new specs, such as a misspelled id in `depends_on` or a dependency cycle, before
+   reporting. A cycle means two units each need the other: merge them or split out the
+   shared part.
+7. Do not update `context/current-feature.md` and do not create a branch.
+8. Report the specs created, in the order `scripts/spec-fields.sh order` gives, with a
+   one-line description each, plus any plan sections skipped as already covered and any
+   `scripts/spec-fields.sh overlaps` among the new specs. Suggest running `audit` across the
+   new specs before the first one is loaded, then tell the user to load whichever one they
+   want to start with (`feature load <nn-name>`).
